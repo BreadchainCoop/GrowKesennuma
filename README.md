@@ -1,66 +1,92 @@
-## Foundry
+# GrowKesennuma Smart Contracts
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+Smart contracts for managing impactor registration, voting, and fund disbursement in Kesennuma.
 
-Foundry consists of:
+## Overview
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+This project consists of four main contracts:
 
-## Documentation
+1. `ImpactorRegistry`: Manages impactor registration and approval
+2. `Allowlist`: Controls who can participate in voting
+3. `Governance`: Handles voting for impactors
+4. `Disbursement`: Manages fund distribution based on votes
 
-https://book.getfoundry.sh/
+## Prerequisites
 
-## Usage
+- [Foundry](https://book.getfoundry.sh/getting-started/installation)
+- Node.js and npm (for development tools)
 
-### Build
+## Setup
 
-```shell
-$ forge build
+1. Clone the repository:
+```bash
+git clone https://github.com/your-username/GrowKesennuma.git
+cd GrowKesennuma
 ```
 
-### Test
-
-```shell
-$ forge test
+2. Install dependencies:
+```bash
+forge install
 ```
 
-### Format
-
-```shell
-$ forge fmt
+3. Copy the environment file and fill in your values:
+```bash
+cp .env.example .env
 ```
 
-### Gas Snapshots
+## Testing
 
-```shell
-$ forge snapshot
+Run the test suite:
+```bash
+forge test
 ```
 
-### Anvil
+## Deployment
 
-```shell
-$ anvil
+1. Set up your environment variables in `.env`:
+   - `PRIVATE_KEY`: Your deployer account's private key (without 0x prefix)
+   - `TOKEN_ADDRESS`: Address of the ERC20 token to use for disbursements
+   - `RPC_URL`: RPC URL for the network you're deploying to
+
+2. Deploy to a testnet:
+```bash
+forge script script/Deploy.s.sol:DeployScript --rpc-url $RPC_URL --broadcast --verify
 ```
 
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+3. Deploy to mainnet:
+```bash
+forge script script/Deploy.s.sol:DeployScript --rpc-url $RPC_URL --broadcast --verify
 ```
 
-### Cast
+## Contract Architecture
 
-```shell
-$ cast <subcommand>
-```
+### ImpactorRegistry
+- Manages impactor registration
+- Handles impactor approval
+- Stores impactor information
 
-### Help
+### Allowlist
+- Controls access to voting
+- Manages allowlist membership
+- Handles ownership transfer
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+### Governance
+- Manages voting for impactors
+- Tracks vote weights
+- Handles epoch management
+
+### Disbursement
+- Manages fund distribution
+- Calculates proportional shares
+- Tracks balances
+
+## Security
+
+- All contracts use OpenZeppelin's security best practices
+- Access control is implemented for sensitive functions
+- Comprehensive test coverage
+- Formal verification planned
+
+## License
+
+MIT
