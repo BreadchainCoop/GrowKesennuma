@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract MockToken is ERC20 {
     constructor() ERC20("Mock Token", "MTK") {
-        _mint(msg.sender, 1000000 * 10**decimals());
+        _mint(msg.sender, 1000000 * 10 ** decimals());
     }
 }
 
@@ -20,7 +20,7 @@ contract DisbursementTest is Test {
     Governance public governance;
     Allowlist public allowlist;
     MockToken public token;
-    
+
     address public owner;
     address public voter1;
     address public impactor1;
@@ -35,7 +35,7 @@ contract DisbursementTest is Test {
         token = new MockToken();
         impactorRegistry = new ImpactorRegistry();
         allowlist = new Allowlist();
-        
+
         // Deploy Disbursement first with a temporary Governance address
         disbursement = new Disbursement(
             address(impactorRegistry),
@@ -44,11 +44,7 @@ contract DisbursementTest is Test {
         );
 
         // Deploy Governance with the actual Disbursement address
-        governance = new Governance(
-            address(impactorRegistry),
-            address(allowlist),
-            address(disbursement)
-        );
+        governance = new Governance(address(impactorRegistry), address(allowlist), address(disbursement));
 
         // Update Disbursement with the actual Governance address
         disbursement.setGovernance(address(governance));
@@ -72,27 +68,27 @@ contract DisbursementTest is Test {
         governance.vote(impactorIds, points);
 
         // Add funds
-        token.approve(address(disbursement), 1000 * 10**token.decimals());
-        disbursement.addFunds(1000 * 10**token.decimals());
+        token.approve(address(disbursement), 1000 * 10 ** token.decimals());
+        disbursement.addFunds(1000 * 10 ** token.decimals());
     }
 
     function testDisburseFunds() public {
         disbursement.disburseFunds();
-        
+
         // Check balances after disbursement
         uint256 impactor1Balance = token.balanceOf(impactor1);
         uint256 impactor2Balance = token.balanceOf(impactor2);
-        
+
         // 30% to impactor1, 70% to impactor2
-        assertEq(impactor1Balance, 300 * 10**token.decimals());
-        assertEq(impactor2Balance, 700 * 10**token.decimals());
+        assertEq(impactor1Balance, 300 * 10 ** token.decimals());
+        assertEq(impactor2Balance, 700 * 10 ** token.decimals());
         assertEq(token.balanceOf(address(disbursement)), 0);
         assertEq(disbursement.totalFunds(), 0);
     }
 
     function test_RevertWhen_DisbursingWithNoFunds() public {
         disbursement.disburseFunds(); // First disbursement should succeed
-        
+
         vm.expectRevert();
         disbursement.disburseFunds(); // Second disbursement should fail
     }
@@ -109,4 +105,4 @@ contract DisbursementTest is Test {
         vm.expectRevert();
         disbursement.transferOwnership(newOwner);
     }
-} 
+}

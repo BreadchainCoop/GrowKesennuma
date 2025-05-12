@@ -14,7 +14,7 @@ contract DeployScript is Script {
         // Deploy core contracts
         ImpactorRegistry impactorRegistry = new ImpactorRegistry();
         Allowlist allowlist = new Allowlist();
-        
+
         // Deploy Disbursement first with a temporary Governance address
         Disbursement disbursement = new Disbursement(
             address(impactorRegistry),
@@ -23,11 +23,7 @@ contract DeployScript is Script {
         );
 
         // Deploy Governance with the actual Disbursement address
-        Governance governance = new Governance(
-            address(impactorRegistry),
-            address(allowlist),
-            address(disbursement)
-        );
+        Governance governance = new Governance(address(impactorRegistry), address(allowlist), address(disbursement));
 
         // Update Disbursement with the actual Governance address
         disbursement.setGovernance(address(governance));
@@ -40,4 +36,4 @@ contract DeployScript is Script {
         console.log("Disbursement deployed to:", address(disbursement));
         console.log("Governance deployed to:", address(governance));
     }
-} 
+}

@@ -16,22 +16,18 @@ contract Governance {
     ImpactorRegistry public impactorRegistry;
     Allowlist public allowlist;
     address public immutable disbursement;
-    
+
     mapping(address => Vote[]) public userVotes;
     mapping(uint256 => uint256) public totalVotes;
     mapping(address => uint256) public lastVoteEpoch;
     uint256 public currentEpoch;
     uint256 public maxPoints;
-    
+
     event VoteCast(address indexed voter, uint256[] impactorIds, uint256[] points, uint256 votingPower, uint256 epoch);
     event EpochIncremented(uint256 newEpoch);
     event VotesReset();
 
-    constructor(
-        address _impactorRegistry,
-        address _allowlist,
-        address _disbursement
-    ) {
+    constructor(address _impactorRegistry, address _allowlist, address _disbursement) {
         require(_disbursement != address(0), "Invalid disbursement address");
         impactorRegistry = ImpactorRegistry(_impactorRegistry);
         allowlist = Allowlist(_allowlist);
@@ -53,7 +49,7 @@ contract Governance {
     function vote(uint256[] calldata _impactorIds, uint256[] calldata _points) external onlyAllowlisted {
         require(_impactorIds.length == _points.length, "Arrays length mismatch");
         require(_impactorIds.length > 0, "Empty arrays");
-        
+
         // Get user's voting power (for now just using 1, but could be based on token balance or other factors)
         uint256 votingPower = 10e18;
 
@@ -79,16 +75,11 @@ contract Governance {
         for (uint256 i = 0; i < _impactorIds.length; i++) {
             require(_impactorIds[i] < impactorRegistry.getImpactorCount(), "Invalid impactor ID");
             require(impactorRegistry.impactorExists(_impactorIds[i]), "Impactor not approved");
-            
+
             // Calculate weight based on points and voting power
             uint256 weight = (_points[i] * votingPower * 1e18) / totalPoints / 1e18;
-            
-            newVotes.push(Vote({
-                impactorId: _impactorIds[i],
-                points: _points[i],
-                weight: weight,
-                epoch: currentEpoch
-            }));
+
+            newVotes.push(Vote({impactorId: _impactorIds[i], points: _points[i], weight: weight, epoch: currentEpoch}));
             totalVotes[_impactorIds[i]] += weight;
         }
 
@@ -115,9 +106,12 @@ contract Governance {
         return totalVotes[_impactorId];
     }
 
-    function setMaxPoints(uint256 _maxPoints) external{
-        require(msg.sender == Disbursement(disbursement).owner(), "Only the owner of the disbursement contract can call this function");
+    function setMaxPoints(uint256 _maxPoints) external {
+        require(
+            msg.sender == Disbursement(disbursement).owner(),
+            "Only the owner of the disbursement contract can call this function"
+        );
         require(_maxPoints > 0, "Max points must be greater than 0");
         maxPoints = _maxPoints;
     }
-} 
+}

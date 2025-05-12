@@ -21,7 +21,7 @@ contract Allowlist {
     function allow(address _user) external onlyOwner {
         require(_user != address(0), "Invalid user address");
         require(!isAllowed[_user], "User already allowed");
-        
+
         isAllowed[_user] = true;
         emit UserAllowed(_user);
     }
@@ -44,4 +44,4 @@ contract Allowlist {
         owner = _newOwner;
         emit OwnerChanged(_newOwner);
     }
-} 
+}

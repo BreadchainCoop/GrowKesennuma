@@ -8,7 +8,7 @@ import "../src/Allowlist.sol";
 
 contract MockDisbursement {
     address public owner;
-    
+
     constructor(address _owner) {
         owner = _owner;
     }
@@ -19,7 +19,7 @@ contract GovernanceTest is Test {
     ImpactorRegistry public impactorRegistry;
     Allowlist public allowlist;
     MockDisbursement public disbursement;
-    
+
     address public owner;
     address public voter1;
     address public voter2;
@@ -55,7 +55,7 @@ contract GovernanceTest is Test {
 
         vm.prank(voter1);
         governance.vote(impactorIds, points);
-        
+
         Governance.Vote[] memory votes = governance.getVotesByUser(voter1);
         assertEq(votes.length, 1);
         assertEq(votes[0].impactorId, 0);
@@ -72,11 +72,11 @@ contract GovernanceTest is Test {
 
         vm.prank(voter1);
         governance.vote(impactorIds, points);
-        
+
         points[0] = 100;
         vm.prank(voter1);
         governance.vote(impactorIds, points);
-        
+
         Governance.Vote[] memory votes = governance.getVotesByUser(voter1);
         assertEq(votes.length, 1);
         assertEq(votes[0].impactorId, 0);
@@ -95,7 +95,7 @@ contract GovernanceTest is Test {
 
         vm.prank(voter1);
         governance.vote(impactorIds, points);
-        
+
         Governance.Vote[] memory votes = governance.getVotesByUser(voter1);
         assertEq(votes.length, 2);
         assertEq(votes[0].points, 30);
@@ -211,4 +211,4 @@ contract GovernanceTest is Test {
         assertEq(governance.getTotalVotes(0), 3e18);
         assertEq(governance.getTotalVotes(1), 7e18);
     }
-} 
+}

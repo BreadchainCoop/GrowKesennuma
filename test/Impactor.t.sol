@@ -21,7 +21,7 @@ contract ImpactorTest is Test {
         uint256 id = impactorRegistry.addImpactor(impactor1, "Test Impactor");
         assertEq(id, 0);
         assertEq(impactorRegistry.getImpactorCount(), 1);
-        
+
         (address wallet, string memory name) = impactorRegistry.getImpactor(id);
         assertEq(wallet, impactor1);
         assertEq(name, "Test Impactor");
@@ -56,4 +56,4 @@ contract ImpactorTest is Test {
         vm.expectRevert("Name cannot be empty");
         impactorRegistry.addImpactor(impactor1, "");
     }
-} 
+}
