@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "./Impactor.sol";
 import "./Allowlist.sol";
+import "./Disbursement.sol";
 
 contract Governance {
     struct Vote {
@@ -56,16 +57,14 @@ contract Governance {
         // Get user's voting power (for now just using 1, but could be based on token balance or other factors)
         uint256 votingPower = 10e18;
 
-        // Remove all previous votes if they're from a previous epoch
-        if (lastVoteEpoch[msg.sender] < currentEpoch) {
-            Vote[] storage votes = userVotes[msg.sender];
-            for (uint256 i = 0; i < votes.length; i++) {
-                if (totalVotes[votes[i].impactorId] >= votes[i].weight) {
-                    totalVotes[votes[i].impactorId] -= votes[i].weight;
-                }
+        // Always remove previous votes before adding new ones
+        Vote[] storage votes = userVotes[msg.sender];
+        for (uint256 i = 0; i < votes.length; i++) {
+            if (totalVotes[votes[i].impactorId] >= votes[i].weight) {
+                totalVotes[votes[i].impactorId] -= votes[i].weight;
             }
-            delete userVotes[msg.sender];
         }
+        delete userVotes[msg.sender];
 
         // Calculate total points
         uint256 totalPoints;
@@ -76,7 +75,7 @@ contract Governance {
         require(totalPoints > 0, "Total points must be greater than 0");
 
         // Add new votes
-        Vote[] storage votes = userVotes[msg.sender];
+        Vote[] storage newVotes = userVotes[msg.sender];
         for (uint256 i = 0; i < _impactorIds.length; i++) {
             require(_impactorIds[i] < impactorRegistry.getImpactorCount(), "Invalid impactor ID");
             require(impactorRegistry.impactorExists(_impactorIds[i]), "Impactor not approved");
@@ -84,7 +83,7 @@ contract Governance {
             // Calculate weight based on points and voting power
             uint256 weight = (_points[i] * votingPower * 1e18) / totalPoints / 1e18;
             
-            votes.push(Vote({
+            newVotes.push(Vote({
                 impactorId: _impactorIds[i],
                 points: _points[i],
                 weight: weight,
@@ -116,7 +115,8 @@ contract Governance {
         return totalVotes[_impactorId];
     }
 
-    function setMaxPoints(uint256 _maxPoints) external {
+    function setMaxPoints(uint256 _maxPoints) external{
+        require(msg.sender == Disbursement(disbursement).owner(), "Only the owner of the disbursement contract can call this function");
         require(_maxPoints > 0, "Max points must be greater than 0");
         maxPoints = _maxPoints;
     }
