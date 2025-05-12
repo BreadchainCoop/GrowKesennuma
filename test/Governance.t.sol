@@ -6,17 +6,25 @@ import "../src/Governance.sol";
 import "../src/Impactor.sol";
 import "../src/Allowlist.sol";
 
+contract MockDisbursement {
+    address public owner;
+
+    constructor(address _owner) {
+        owner = _owner;
+    }
+}
+
 contract GovernanceTest is Test {
     Governance public governance;
     ImpactorRegistry public impactorRegistry;
     Allowlist public allowlist;
-    
+    MockDisbursement public disbursement;
+
     address public owner;
     address public voter1;
     address public voter2;
     address public impactor1;
     address public impactor2;
-    address public disbursement;
 
     function setUp() public {
         owner = address(this);
@@ -24,11 +32,11 @@ contract GovernanceTest is Test {
         voter2 = address(0x2);
         impactor1 = address(0x3);
         impactor2 = address(0x4);
-        disbursement = address(0x5);
 
         impactorRegistry = new ImpactorRegistry();
         allowlist = new Allowlist();
-        governance = new Governance(address(impactorRegistry), address(allowlist), disbursement);
+        disbursement = new MockDisbursement(owner);
+        governance = new Governance(address(impactorRegistry), address(allowlist), address(disbursement));
 
         // Setup impactors
         impactorRegistry.addImpactor(impactor1, "Impactor 1");
@@ -47,7 +55,7 @@ contract GovernanceTest is Test {
 
         vm.prank(voter1);
         governance.vote(impactorIds, points);
-        
+
         Governance.Vote[] memory votes = governance.getVotesByUser(voter1);
         assertEq(votes.length, 1);
         assertEq(votes[0].impactorId, 0);
@@ -64,11 +72,11 @@ contract GovernanceTest is Test {
 
         vm.prank(voter1);
         governance.vote(impactorIds, points);
-        
+
         points[0] = 100;
         vm.prank(voter1);
         governance.vote(impactorIds, points);
-        
+
         Governance.Vote[] memory votes = governance.getVotesByUser(voter1);
         assertEq(votes.length, 1);
         assertEq(votes[0].impactorId, 0);
@@ -87,7 +95,7 @@ contract GovernanceTest is Test {
 
         vm.prank(voter1);
         governance.vote(impactorIds, points);
-        
+
         Governance.Vote[] memory votes = governance.getVotesByUser(voter1);
         assertEq(votes.length, 2);
         assertEq(votes[0].points, 30);
@@ -106,7 +114,7 @@ contract GovernanceTest is Test {
 
         address nonAllowlisted = address(0x5);
         vm.prank(nonAllowlisted);
-        vm.expectRevert("User not allowlisted");
+        vm.expectRevert("Governance: not allow-listed");
         governance.vote(impactorIds, points);
     }
 
@@ -117,7 +125,7 @@ contract GovernanceTest is Test {
         points[0] = 100;
 
         vm.prank(voter1);
-        vm.expectRevert("Invalid impactor ID");
+        vm.expectRevert("Governance: invalid impactor");
         governance.vote(impactorIds, points);
     }
 
@@ -128,7 +136,7 @@ contract GovernanceTest is Test {
         points[0] = governance.maxPoints() + 1;
 
         vm.prank(voter1);
-        vm.expectRevert("Points exceed maximum");
+        vm.expectRevert("Governance: points > max");
         governance.vote(impactorIds, points);
     }
 
@@ -140,7 +148,7 @@ contract GovernanceTest is Test {
         points[0] = 100;
 
         vm.prank(voter1);
-        vm.expectRevert("Arrays length mismatch");
+        vm.expectRevert("Governance: bad array lengths");
         governance.vote(impactorIds, points);
     }
 
@@ -149,7 +157,7 @@ contract GovernanceTest is Test {
         uint256[] memory points = new uint256[](0);
 
         vm.prank(voter1);
-        vm.expectRevert("Empty arrays");
+        vm.expectRevert("Governance: bad array lengths");
         governance.vote(impactorIds, points);
     }
 
@@ -160,12 +168,13 @@ contract GovernanceTest is Test {
         points[0] = 0;
 
         vm.prank(voter1);
-        vm.expectRevert("Total points must be greater than 0");
+        vm.expectRevert("Governance: totalPoints = 0");
         governance.vote(impactorIds, points);
     }
 
     function testSetMaxPoints() public {
         uint256 newMaxPoints = 200;
+        vm.prank(Disbursement(address(disbursement)).owner());
         governance.setMaxPoints(newMaxPoints);
         assertEq(governance.maxPoints(), newMaxPoints);
     }
@@ -188,7 +197,7 @@ contract GovernanceTest is Test {
         assertEq(governance.currentEpoch(), 1);
 
         // Reset votes
-        vm.prank(disbursement);
+        vm.prank(address(disbursement));
         governance.resetVotes();
 
         // Verify votes are cleared and epoch is incremented
@@ -202,4 +211,4 @@ contract GovernanceTest is Test {
         assertEq(governance.getTotalVotes(0), 3e18);
         assertEq(governance.getTotalVotes(1), 7e18);
     }
-} 
+}

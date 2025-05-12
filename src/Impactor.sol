@@ -10,7 +10,7 @@ contract ImpactorRegistry {
     Impactor[] public impactors;
     mapping(address => uint256) public impactorIds;
     mapping(uint256 => bool) public impactorExists;
-    
+
     event ImpactorAdded(uint256 indexed id, address indexed wallet, string name);
 
     function addImpactor(address _wallet, string memory _name) public returns (uint256) {
@@ -19,10 +19,7 @@ contract ImpactorRegistry {
         require(impactorIds[_wallet] == 0, "Impactor already exists");
 
         uint256 id = impactors.length;
-        impactors.push(Impactor({
-            wallet: _wallet,
-            name: _name
-        }));
+        impactors.push(Impactor({wallet: _wallet, name: _name}));
         impactorIds[_wallet] = id + 1; // Add 1 to distinguish from non-existent impactors
         impactorExists[id] = true;
         emit ImpactorAdded(id, _wallet, _name);
@@ -38,4 +35,4 @@ contract ImpactorRegistry {
     function getImpactorCount() public view returns (uint256) {
         return impactors.length;
     }
-} 
+}

@@ -75,4 +75,4 @@ contract AllowlistTest is Test {
         vm.expectRevert("Only owner can call this function");
         allowlist.transferOwnership(user2);
     }
-} 
+}
