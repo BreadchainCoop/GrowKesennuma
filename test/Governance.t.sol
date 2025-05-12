@@ -114,7 +114,7 @@ contract GovernanceTest is Test {
 
         address nonAllowlisted = address(0x5);
         vm.prank(nonAllowlisted);
-        vm.expectRevert("User not allowlisted");
+        vm.expectRevert("Governance: not allow-listed");
         governance.vote(impactorIds, points);
     }
 
@@ -125,7 +125,7 @@ contract GovernanceTest is Test {
         points[0] = 100;
 
         vm.prank(voter1);
-        vm.expectRevert("Invalid impactor ID");
+        vm.expectRevert("Governance: invalid impactor");
         governance.vote(impactorIds, points);
     }
 
@@ -136,7 +136,7 @@ contract GovernanceTest is Test {
         points[0] = governance.maxPoints() + 1;
 
         vm.prank(voter1);
-        vm.expectRevert("Points exceed maximum");
+        vm.expectRevert("Governance: points > max");
         governance.vote(impactorIds, points);
     }
 
@@ -148,7 +148,7 @@ contract GovernanceTest is Test {
         points[0] = 100;
 
         vm.prank(voter1);
-        vm.expectRevert("Arrays length mismatch");
+        vm.expectRevert("Governance: bad array lengths");
         governance.vote(impactorIds, points);
     }
 
@@ -157,7 +157,7 @@ contract GovernanceTest is Test {
         uint256[] memory points = new uint256[](0);
 
         vm.prank(voter1);
-        vm.expectRevert("Empty arrays");
+        vm.expectRevert("Governance: bad array lengths");
         governance.vote(impactorIds, points);
     }
 
@@ -168,7 +168,7 @@ contract GovernanceTest is Test {
         points[0] = 0;
 
         vm.prank(voter1);
-        vm.expectRevert("Total points must be greater than 0");
+        vm.expectRevert("Governance: totalPoints = 0");
         governance.vote(impactorIds, points);
     }
 
